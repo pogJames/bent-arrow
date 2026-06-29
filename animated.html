@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>animated arrow</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 50% 42%, #16223d, #0c1424 70%);
+    }
+
+    svg {
+      width: min(110vmin, 1080px);
+      stroke: #1f5fff;
+      fill: #1f5fff;
+    }
+
+    .shaft {
+      fill: none;
+      stroke-width: 16;
+      stroke-linejoin: miter;
+    }
+
+    .head {
+      stroke: none;
+    }
+
+    .pale {
+      opacity: 0.4;
+    }
+
+    #sweep {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 36;
+      stroke-dasharray: 100 100;
+      animation: cycle 3.2s ease-in-out infinite;
+    }
+
+    @keyframes cycle {
+      0%   { stroke-dashoffset:  100; }
+      50%  { stroke-dashoffset:    0; }
+      100% { stroke-dashoffset: -100; }
+    }
+  </style>
+</head>
+<body>
+  <svg viewBox="-30 -30 400 240" aria-label="A bent arrow"></svg>
+
+  <script>
+    // CONSTANTS !!!
+    const SEGMENT_LENS = [280, 70, 70, 70, 70];
+    const TURN_DEG     = 45;   // angle added at each joint
+    const HEAD_LEN     = 32;   // how far the arrowhead extends back
+    const HEAD_HALF    = 32;   // half-angle of the arrowhead
+    const toRad = deg => deg * Math.PI / 180;
+
+    // Calculate angled points along the shaft.
+    const points = [[0, 0]];
+    let heading = 0;
+    for (const len of SEGMENT_LENS) {
+      const [x, y] = points[points.length - 1];
+      const angle = toRad(heading);
+      points.push([x + len * Math.cos(angle),
+                   y + len * Math.sin(angle)]);
+      heading += TURN_DEG;
+    }
+
+    // Look up arrow tip angle.
+    const [tipX, tipY] = points[points.length - 1];
+    const [prevX, prevY] = points[points.length - 2];
+    const backAngle = Math.atan2(prevY - tipY, prevX - tipX);
+
+    // Construct the arrowhead corners and neck point.
+    const headCorner = side => [
+      tipX + HEAD_LEN * Math.cos(backAngle + side * toRad(HEAD_HALF)),
+      tipY + HEAD_LEN * Math.sin(backAngle + side * toRad(HEAD_HALF)),
+    ];
+    const cornerA = headCorner(1);
+    const cornerB = headCorner(-1);
+    const neck = [(cornerA[0] + cornerB[0]) / 2, (cornerA[1] + cornerB[1]) / 2];
+
+    // Turn points into a path string for the SVG.
+    const toPath = pts => "M" + pts.map(pt => pt.join(",")).join("L");
+    const shaftPath = toPath([...points.slice(0, -1), neck]);
+    const headPoints = [cornerA, [tipX, tipY], cornerB].map(pt => pt.join(",")).join(" ");
+
+    // Two layers: a faint always-on arrow, and a bright arrow revealed
+    // only through the moving sweep mask.
+    const arrow =
+      `<path class="shaft pale" d="${shaftPath}"/>` +
+      `<polygon class="head pale" points="${headPoints}"/>` +
+      `<g mask="url(#m)">` +
+        `<path class="shaft" d="${shaftPath}"/>` +
+        `<polygon class="head" points="${headPoints}"/>` +
+      `</g>`;
+
+    document.querySelector("svg").innerHTML =
+      `<mask id="m">` +
+        `<path id="sweep" pathLength="100" d="${toPath(points)}"/>` +
+      `</mask>` +
+      arrow;
+  </script>
+</body>
+</html>

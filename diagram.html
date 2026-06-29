@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>chiller plant diagram</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f4f6f9;
+      font-family: "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    /* Positioned canvas: images and arrows are placed with absolute coords. */
+    .diagram {
+      position: relative;
+      width: 920px;
+      height: 480px;
+    }
+
+    /* Equipment placeholder — shown as bracketed text in place of an image. */
+    .node {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #33425b;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* Temperature readouts. */
+    .label {
+      position: absolute;
+      font-size: 13px;
+      color: #4a5568;
+      white-space: nowrap;
+    }
+    .label b { font-weight: 600; }
+
+    bent-arrow { position: absolute; }
+  </style>
+</head>
+<body>
+  <div class="diagram">
+    <!-- ===== Equipment (text placeholders — swap for <img> later) ===== -->
+    <img src="tower.png" class="node" style="left:250px; top:-40px; width:140px; height:140px;" alt="[冷却塔]">
+    <img src="chiller.png" class="node" style="left:160px; top:120px; width:240px; height:240px;" alt="[冷水机组]">
+    <img src="pumps.png" class="node" style="left:616px; top:112px; width:140px; height:88px;" alt="[水泵 ×3]">
+    <img src="pumps.png" class="node" style="left:616px; top:200px; width:140px; height:88px;" alt="[水泵 ×3]">
+    <img src="pumps.png" class="node" style="left:616px; top:288px; width:140px; height:88px;" alt="[水泵 ×3]">
+    <img src="ac.png" class="node" style="left:220px; top:400px; width:200px; height:120px;" alt="[风机盘管]">
+
+    <!-- ===== Cooling-water loop (orange) ===== -->
+    <!-- Supply: chiller -> up the left -> across to cooling tower -->
+    <bent-arrow
+      style="left:10px; top:0px; width:240px; height:240px;"
+      lengths="80,40,100,40,160" angle="180" color="#e0934e" animate></bent-arrow>
+
+    <!-- Return: cooling tower -> right -> down -> back into chiller -->
+    <bent-arrow
+      style="left:400px; top:-20px; width:480px; height:240px;"
+      lengths="420,40,60,40,80" angle="0" color="#e57c21" animate></bent-arrow>
+
+    <bent-arrow
+      style="left:400px; top:120px; width:200px; height:80px;"
+      lengths="260" angle="180" color="#e57c21" animate duration="1.6s"></bent-arrow>
+
+    <!-- ===== Chilled-water loop (blue) ===== -->
+    <!-- Return: air handler -> right -> up into the pumps -->
+    <bent-arrow
+      style="left:400px; top:280px; width:480px; height:260px;"
+      lengths="40,392,40,120,40,80" angle="45" color="#7cc0e8" animate counter></bent-arrow>
+
+    <!-- Supply: chiller -> down -> across into the air handler -->
+    <bent-arrow
+      style="left:10px; top:260px; width:240px; height:240px;"
+      lengths="80,40,100,40,160" angle="180" color="#2f81d6" animate counter></bent-arrow>
+
+    <bent-arrow
+      style="left:400px; top:280px; width:200px; height:80px;"
+      lengths="260" angle="180" color="#7cc0e8" animate counter duration="1.6s"></bent-arrow>
+
+    <!-- ===== Temperature labels ===== -->
+    <div class="label" style="left:40px;  top:0px;">冷却水出水温度 <b>23.5 ℃</b></div>
+    <div class="label" style="left:448px; top:128px;">冷却水回水温度 <b>23.3 ℃</b></div>
+    <div class="label" style="left:456px; top:288px;">冰水回水温度 <b>12.4 ℃</b></div>
+    <div class="label" style="left:60px;  top:430px;">冰水出水温度 <b>12.5 ℃</b></div>
+  </div>
+
+  <script src="bent-arrow.js"></script>
+</body>
+</html>
